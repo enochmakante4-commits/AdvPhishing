@@ -1,0 +1,2352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>FarmLink Ghana</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+background:#e8f5e9;
+}
+
+header{
+background:#0b5d1e;
+color:white;
+padding:18px;
+text-align:center;
+font-size:28px;
+font-weight:bold;
+position:sticky;
+top:0;
+z-index:1000;
+}
+
+nav{
+display:flex;
+justify-content:center;
+flex-wrap:wrap;
+background:#1b7f35;
+}
+
+nav button{
+margin:8px;
+padding:12px 18px;
+border:none;
+border-radius:8px;
+background:white;
+cursor:pointer;
+font-weight:bold;
+}
+
+nav button:hover{
+background:#dcedc8;
+}
+
+.page{
+display:none;
+padding:20px;
+}
+
+.active{
+display:block;
+}
+
+.card{
+background:white;
+padding:20px;
+margin:15px 0;
+border-radius:15px;
+box-shadow:0 4px 10px rgba(0,0,0,.15);
+}
+
+input,select,textarea{
+width:100%;
+padding:12px;
+margin-top:8px;
+margin-bottom:15px;
+border:1px solid #bbb;
+border-radius:8px;
+}
+
+button.action{
+background:#2e7d32;
+color:white;
+padding:12px;
+width:100%;
+border:none;
+border-radius:8px;
+font-size:16px;
+cursor:pointer;
+}
+
+button.action:hover{
+background:#1b5e20;
+}
+
+#map{
+height:400px;
+border-radius:12px;
+margin-top:20px;
+}
+
+.cropCard{
+background:#f7fff7;
+padding:15px;
+border-radius:10px;
+margin-top:15px;
+border-left:6px solid green;
+}
+
+footer{
+background:#0b5d1e;
+color:white;
+padding:25px;
+text-align:center;
+margin-top:40px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+🌱 FarmLink Ghana
+
+</header>
+
+<nav>
+
+<button onclick="showPage('home')">Home</button>
+
+<button onclick="showPage('farmer')">Farmer</button>
+
+<button onclick="showPage('buyer')">Buyer</button>
+
+<button onclick="showPage('market')">Marketplace</button>
+
+<button onclick="showPage('transport')">Transport</button>
+
+<button onclick="showPage('payment')">Payment</button>
+
+<button onclick="showPage('admin')">Admin</button>
+
+</nav>
+
+<div id="home" class="page active">
+
+<div class="card">
+
+<h2>Welcome to FarmLink Ghana</h2>
+
+<p>
+
+Connecting Farmers in Northern and Oti Regions
+with buyers in Accra, Kumasi,
+Takoradi and Tamale.
+
+</p>
+
+<br>
+
+<button class="action">
+
+Register Now
+
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>Featured Crops</h2>
+
+<ul>
+
+<li>Yam</li>
+
+<li>Maize</li>
+
+<li>Groundnut</li>
+
+<li>Soya Beans</li>
+
+<li>Millet</li>
+
+<li>Cassava</li>
+
+<li>Pepper</li>
+
+<li>Agushie</li>
+
+</ul>
+
+</div>
+
+</div>
+<!-- FARMER PAGE -->
+
+<div id="farmer" class="page">
+
+<div class="card">
+
+<h2>Farmer Registration</h2>
+
+<input type="text" id="farmerName" placeholder="Full Name">
+
+<input type="text" id="farmerPhone" placeholder="Phone Number">
+
+<input type="email" id="farmerEmail" placeholder="Email Address">
+
+<input type="text" id="farmLocation" placeholder="Farm Location">
+
+<select id="cropType">
+
+<option>Yam</option>
+<option>Maize</option>
+<option>Groundnut</option>
+<option>Soya Beans</option>
+<option>Millet</option>
+<option>Cassava</option>
+<option>Pepper</option>
+<option>Agushie</option>
+
+</select>
+
+<button class="action" onclick="registerFarmer()">
+
+Register Farmer
+
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>Upload Crops</h2>
+
+<input type="text" id="cropName" placeholder="Crop Name">
+
+<input type="number" id="cropQuantity" placeholder="Quantity">
+
+<input type="number" id="cropPrice" placeholder="Price (GH₵)">
+
+<input type="text" id="cropTown" placeholder="Town">
+
+<input type="file" id="cropImage">
+
+<button class="action" onclick="uploadCrop()">
+
+Upload Crop
+
+</button>
+
+</div>
+
+</div>
+
+<!-- BUYER PAGE -->
+
+<div id="buyer" class="page">
+
+<div class="card">
+
+<h2>Buyer Registration</h2>
+
+<input type="text" placeholder="Buyer Name">
+
+<input type="email" placeholder="Email">
+
+<input type="text" placeholder="Phone">
+
+<input type="text" placeholder="Town">
+
+<button class="action">
+
+Register Buyer
+
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>Search Crops</h2>
+
+<input type="text" id="searchBox" placeholder="Search Crop..." onkeyup="searchCrop()">
+
+<div id="cropResults"></div>
+
+</div>
+
+</div>
+
+<!-- MARKETPLACE -->
+
+<div id="market" class="page">
+
+<div class="card">
+
+<h2>Marketplace</h2>
+
+<div id="marketList">
+
+<p>No crops uploaded yet.</p>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>Farmer Locations</h2>
+
+<div id="map"></div>
+
+</div>
+
+</div>
+
+<!-- TRANSPORT -->
+
+<div id="transport" class="page">
+
+<div class="card">
+
+<h2>Transport Connection</h2>
+
+<p>
+
+Connect buyers with truck owners for easy delivery.
+
+</p>
+
+<input placeholder="Truck Owner Name">
+
+<input placeholder="Phone">
+
+<input placeholder="Truck Capacity">
+
+<button class="action">
+
+Register Truck
+
+</button>
+
+</div>
+
+</div>
+
+<!-- PAYMENT -->
+
+<div id="payment" class="page">
+
+<div class="card">
+
+<h2>Payment Centre</h2>
+
+<p>
+
+Future support for MTN Mobile Money,
+Telecel Cash and AirtelTigo Money.
+
+</p>
+
+<button class="action">
+
+Proceed
+
+</button>
+
+</div>
+
+</div>
+
+<!-- ADMIN -->
+
+<div id="admin" class="page">
+
+<div class="card">
+
+<h2>Admin Dashboard</h2>
+
+<p>Total Farmers : <span id="farmerCount">0</span></p>
+
+<p>Total Crops : <span id="cropCount">0</span></p>
+
+<p>Total Buyers : <span id="buyerCount">0</span></p>
+
+<button class="action">
+
+View Reports
+
+</button>
+
+</div>
+
+</div>
+<footer>
+
+<h2>FarmLink Ghana</h2>
+
+<p>Connecting Farmers and Buyers Across Ghana</p>
+
+<p>CareForMe © 2026</p>
+
+</footer>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+let farmers = [];
+let buyers = [];
+let crops = [];
+
+function showPage(page){
+
+document.querySelectorAll(".page").forEach(function(p){
+
+p.classList.remove("active");
+
+});
+
+document.getElementById(page).classList.add("active");
+
+}
+
+function registerFarmer(){
+
+let name = document.getElementById("farmerName").value;
+let phone = document.getElementById("farmerPhone").value;
+let email = document.getElementById("farmerEmail").value;
+let location = document.getElementById("farmLocation").value;
+
+if(name==""){
+
+alert("Enter farmer name");
+
+return;
+
+}
+
+farmers.push({
+
+name:name,
+phone:phone,
+email:email,
+location:location
+
+});
+
+document.getElementById("farmerCount").innerHTML = farmers.length;
+
+alert("Farmer Registered Successfully");
+
+}
+
+function uploadCrop(){
+
+let crop = document.getElementById("cropName").value;
+let quantity = document.getElementById("cropQuantity").value;
+let price = document.getElementById("cropPrice").value;
+let town = document.getElementById("cropTown").value;
+
+if(crop==""){
+
+alert("Enter Crop");
+
+return;
+
+}
+
+crops.push({
+
+crop:crop,
+quantity:quantity,
+price:price,
+town:town
+
+});
+
+document.getElementById("cropCount").innerHTML = crops.length;
+
+displayMarket();
+
+}
+
+function displayMarket(){
+
+let market=document.getElementById("marketList");
+
+market.innerHTML="";
+
+crops.forEach(function(item){
+
+market.innerHTML += `
+
+<div class="cropCard">
+
+<h3>${item.crop}</h3>
+
+<p><b>Quantity:</b> ${item.quantity}</p>
+
+<p><b>Price:</b> GH₵ ${item.price}</p>
+
+<p><b>Town:</b> ${item.town}</p>
+
+<a href="https://wa.me/233000000000" target="_blank">
+
+<button class="action">
+
+WhatsApp Farmer
+
+</button>
+
+</a>
+
+</div>
+
+`;
+
+});
+
+}
+
+function searchCrop(){
+
+let text=document.getElementById("searchBox").value.toLowerCase();
+
+let result=document.getElementById("cropResults");
+
+result.innerHTML="";
+
+crops.forEach(function(item){
+
+if(item.crop.toLowerCase().includes(text)){
+
+result.innerHTML += `
+
+<div class="cropCard">
+
+<h3>${item.crop}</h3>
+
+<p>GH₵ ${item.price}</p>
+
+<p>${item.town}</p>
+
+</div>
+
+`;
+
+}
+
+});
+
+}
+
+var map=L.map('map').setView([7.9465,-1.0232],6);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+
+maxZoom:18
+
+}).addTo(map);
+
+L.marker([9.4,-0.8]).addTo(map)
+
+.bindPopup("Northern Region");
+
+L.marker([7.6,0.4]).addTo(map)
+
+.bindPopup("Oti Region");
+
+L.marker([5.6037,-0.1870]).addTo(map)
+
+.bindPopup("Accra Buyers");
+
+L.marker([6.6885,-1.6244]).addTo(map)
+
+.bindPopup("Kumasi Buyers");
+
+L.marker([9.4034,-0.8424]).addTo(map)
+
+.bindPopup("Tamale Buyers");
+
+L.marker([4.8845,-1.7554]).addTo(map)
+
+.bindPopup("Takoradi Buyers");
+
+// ==========================
+// LOGIN SYSTEM (DEMO)
+// ==========================
+
+let currentUser = null;
+
+function login(){
+
+let email = prompt("Enter Email");
+
+if(email==""){
+
+alert("Enter email");
+
+return;
+
+}
+
+currentUser=email;
+
+alert("Welcome " + currentUser);
+
+}
+
+// ==========================
+// BUYER REGISTRATION
+// ==========================
+
+function registerBuyer(){
+
+buyers.push({
+
+name:"Buyer"
+
+});
+
+document.getElementById("buyerCount").innerHTML=buyers.length;
+
+alert("Buyer Registered");
+
+}
+
+// ==========================
+// DELETE CROPS
+// ==========================
+
+function deleteCrop(index){
+
+crops.splice(index,1);
+
+displayMarket();
+
+document.getElementById("cropCount").innerHTML=crops.length;
+
+}
+
+// ==========================
+// EDIT CROPS
+// ==========================
+
+function editCrop(index){
+
+let newPrice=prompt("New Price");
+
+if(newPrice){
+
+crops[index].price=newPrice;
+
+displayMarket();
+
+}
+
+}
+
+// ==========================
+// DISPLAY MARKET
+// ==========================
+
+function displayMarket(){
+
+let market=document.getElementById("marketList");
+
+market.innerHTML="";
+
+crops.forEach(function(item,index){
+
+market.innerHTML+=`
+
+<div class="cropCard">
+
+<h2>${item.crop}</h2>
+
+<p>Quantity : ${item.quantity}</p>
+
+<p>Price : GH₵ ${item.price}</p>
+
+<p>Town : ${item.town}</p>
+
+<button class="action"
+onclick="editCrop(${index})">
+
+Edit
+
+</button>
+
+<br><br>
+
+<button class="action"
+onclick="deleteCrop(${index})">
+
+Delete
+
+</button>
+
+<br><br>
+
+<a href="https://wa.me/233000000000">
+
+<button class="action">
+
+WhatsApp Farmer
+
+</button>
+
+</a>
+
+</div>
+
+`;
+
+});
+
+}
+
+// ==========================
+// DARK MODE
+// ==========================
+
+function darkMode(){
+
+document.body.classList.toggle("dark");
+
+}
+
+// ==========================
+// TODAY'S DATE
+// ==========================
+
+let today=new Date();
+
+console.log(today.toDateString());
+// =============================
+// FARMER PROFILE SYSTEM
+// =============================
+
+function viewFarmerProfile(index){
+
+let farmer = farmers[index];
+
+alert(
+"Farmer Profile\n\n"+
+"Name: "+farmer.name+
+"\nPhone: "+farmer.phone+
+"\nEmail: "+farmer.email+
+"\nLocation: "+farmer.location
+);
+
+}
+
+// =============================
+// FAVORITE CROPS
+// =============================
+
+let favourites=[];
+
+function favouriteCrop(index){
+
+favourites.push(crops[index]);
+
+alert("Crop added to favourites.");
+
+}
+
+// =============================
+// NOTIFICATION SYSTEM
+// =============================
+
+function notify(message){
+
+let note=document.createElement("div");
+
+note.style.position="fixed";
+note.style.bottom="20px";
+note.style.right="20px";
+note.style.background="#2e7d32";
+note.style.color="white";
+note.style.padding="15px";
+note.style.borderRadius="10px";
+note.style.zIndex="9999";
+
+note.innerHTML=message;
+
+document.body.appendChild(note);
+
+setTimeout(function(){
+
+note.remove();
+
+},3000);
+
+}
+
+// =============================
+// CROP RATINGS
+// =============================
+
+function rateCrop(index){
+
+let stars=prompt("Rate this crop (1-5)");
+
+if(stars){
+
+notify("Thank you for rating!");
+
+}
+
+}
+
+// =============================
+// WEATHER (DEMO)
+// =============================
+
+function weather(){
+
+let box=document.getElementById("weatherBox");
+
+if(box){
+
+box.innerHTML=
+`
+<h3>Today's Weather</h3>
+<p>☀️ Sunny</p>
+<p>29°C</p>
+<p>Good for harvesting.</p>
+`;
+
+}
+
+}
+
+// =============================
+// MARKET STATISTICS
+// =============================
+
+function marketStats(){
+
+document.getElementById("stats").innerHTML=
+
+`
+
+<h3>Marketplace Statistics</h3>
+
+<p>Total Farmers : ${farmers.length}</p>
+
+<p>Total Buyers : ${buyers.length}</p>
+
+<p>Total Crops : ${crops.length}</p>
+
+`;
+
+}
+
+// =============================
+// SEARCH LOCATION
+// =============================
+
+function searchLocation(){
+
+let town=prompt("Enter Town");
+
+if(town){
+
+notify("Searching for farmers in "+town);
+
+}
+
+}
+
+// =============================
+// SHARE MARKETPLACE
+// =============================
+
+function shareApp(){
+
+navigator.clipboard.writeText(window.location.href);
+
+notify("Link copied.");
+
+}
+
+// =============================
+// CHAT PLACEHOLDER
+// =============================
+
+function openChat(){
+
+alert("Chat system will be connected to Firebase.");
+
+}
+
+// =============================
+// LOAD APP
+// =============================
+
+window.onload=function(){
+
+weather();
+
+marketStats();
+
+};
+// =======================================
+// PROFILE PHOTO PREVIEW
+// =======================================
+
+function previewProfile(input){
+
+const file=input.files[0];
+
+if(!file) return;
+
+const reader=new FileReader();
+
+reader.onload=function(e){
+
+document.getElementById("profilePreview").src=e.target.result;
+
+};
+
+reader.readAsDataURL(file);
+
+}
+
+// =======================================
+// CROP IMAGE PREVIEW
+// =======================================
+
+function previewCrop(input){
+
+const file=input.files[0];
+
+if(!file) return;
+
+const reader=new FileReader();
+
+reader.onload=function(e){
+
+document.getElementById("cropPreview").src=e.target.result;
+
+};
+
+reader.readAsDataURL(file);
+
+}
+
+// =======================================
+// SHOPPING CART
+// =======================================
+
+let cart=[];
+
+function addToCart(index){
+
+cart.push(crops[index]);
+
+notify("Crop added to cart");
+
+updateCart();
+
+}
+
+function updateCart(){
+
+document.getElementById("cartCount").innerHTML=cart.length;
+
+}
+
+// =======================================
+// PLACE ORDER
+// =======================================
+
+function placeOrder(){
+
+if(cart.length==0){
+
+alert("Your cart is empty");
+
+return;
+
+}
+
+notify("Order placed successfully.");
+
+cart=[];
+
+updateCart();
+
+}
+
+// =======================================
+// MOBILE MONEY DEMO
+// =======================================
+
+function payNow(){
+
+let number=prompt("Enter Mobile Money Number");
+
+if(number){
+
+notify("Payment request sent.");
+
+}
+
+}
+
+// =======================================
+// TRUCK OWNER REGISTRATION
+// =======================================
+
+let trucks=[];
+
+function registerTruck(){
+
+let name=prompt("Truck Owner Name");
+
+let phone=prompt("Phone Number");
+
+let size=prompt("Truck Capacity");
+
+trucks.push({
+
+name:name,
+
+phone:phone,
+
+size:size
+
+});
+
+notify("Truck registered.");
+
+}
+
+// =======================================
+// ORDER HISTORY
+// =======================================
+
+let orders=[];
+
+function saveOrder(order){
+
+orders.push(order);
+
+}
+
+// =======================================
+// LIVE CLOCK
+// =======================================
+
+function startClock(){
+
+setInterval(function(){
+
+let now=new Date();
+
+let time=now.toLocaleTimeString();
+
+let clock=document.getElementById("clock");
+
+if(clock){
+
+clock.innerHTML=time;
+
+}
+
+},1000);
+
+}
+
+// =======================================
+// RANDOM FARMING TIPS
+// =======================================
+
+const tips=[
+
+"Harvest crops early in the morning.",
+
+"Store maize in a dry place.",
+
+"Use healthy seeds.",
+
+"Compare prices before selling.",
+
+"Keep farm records."
+
+];
+
+function farmingTip(){
+
+let box=document.getElementById("tip");
+
+if(box){
+
+box.innerHTML=tips[Math.floor(Math.random()*tips.length)];
+
+}
+
+}
+
+startClock();
+
+setInterval(farmingTip,8000);
+
+farmingTip();
+// ======================================
+// NOTIFICATION CENTER
+// ======================================
+
+let notifications=[];
+
+function addNotification(message){
+
+notifications.push({
+
+time:new Date().toLocaleTimeString(),
+
+message:message
+
+});
+
+showNotifications();
+
+}
+
+function showNotifications(){
+
+let box=document.getElementById("notificationBox");
+
+if(!box) return;
+
+box.innerHTML="";
+
+notifications.reverse().forEach(function(item){
+
+box.innerHTML += `
+
+<div class="cropCard">
+
+<b>${item.time}</b>
+
+<p>${item.message}</p>
+
+</div>
+
+`;
+
+});
+
+}
+
+// ======================================
+// BUYER ORDERS
+// ======================================
+
+let buyerOrders=[];
+
+function orderCrop(index){
+
+buyerOrders.push(crops[index]);
+
+notify("Order Sent Successfully");
+
+addNotification("New crop order received.");
+
+}
+
+// ======================================
+// LEADERBOARD
+// ======================================
+
+function leaderBoard(){
+
+let board=document.getElementById("leaderBoard");
+
+if(!board) return;
+
+board.innerHTML="";
+
+farmers.forEach(function(farmer,i){
+
+board.innerHTML += `
+
+<div class="cropCard">
+
+<h3>#${i+1} ${farmer.name}</h3>
+
+<p>${farmer.location}</p>
+
+⭐ ⭐ ⭐ ⭐ ⭐
+
+</div>
+
+`;
+
+});
+
+}
+
+// ======================================
+// DAILY CROP PRICES
+// ======================================
+
+const prices={
+
+Yam:120,
+
+Maize:85,
+
+Groundnut:150,
+
+Pepper:100,
+
+Cassava:70,
+
+Millet:95,
+
+"Soya Beans":130,
+
+Agushie:180
+
+};
+
+function showPrices(){
+
+let table=document.getElementById("priceTable");
+
+if(!table) return;
+
+table.innerHTML="";
+
+for(let crop in prices){
+
+table.innerHTML += `
+
+<tr>
+
+<td>${crop}</td>
+
+<td>GH₵ ${prices[crop]}</td>
+
+</tr>
+
+`;
+
+}
+
+}
+
+// ======================================
+// FARM NEWS
+// ======================================
+
+const news=[
+
+"Rain expected in Northern Region.",
+
+"Maize demand increases this week.",
+
+"Groundnut prices rising.",
+
+"Pepper exports growing.",
+
+"Harvest season has started."
+
+];
+
+function farmNews(){
+
+let box=document.getElementById("newsBox");
+
+if(!box) return;
+
+box.innerHTML=
+
+news[Math.floor(Math.random()*news.length)];
+
+}
+
+setInterval(farmNews,7000);
+
+// ======================================
+// LOADING SCREEN
+// ======================================
+
+window.addEventListener("load",function(){
+
+let loader=document.getElementById("loader");
+
+if(loader){
+
+setTimeout(function(){
+
+loader.style.display="none";
+
+},2000);
+
+}
+
+});
+
+// ======================================
+// SIMPLE PAGE ANIMATION
+// ======================================
+
+document.querySelectorAll(".page").forEach(function(page){
+
+page.style.animation="fadeIn .5s";
+
+});
+// =======================================
+// AI FARM ASSISTANT (DEMO)
+// =======================================
+
+const aiReplies={
+
+hello:"Hello 👋 Welcome to FarmLink Ghana.",
+
+price:"Check today's crop prices in the marketplace.",
+
+sell:"Upload your crops to reach buyers.",
+
+buy:"Search the marketplace to find farmers.",
+
+weather:"Today's weather is good for farming.",
+
+transport:"Visit the Transport page to find truck owners."
+
+};
+
+function askAI(){
+
+let question=document.getElementById("aiQuestion").value.toLowerCase();
+
+let answer=document.getElementById("aiAnswer");
+
+let found=false;
+
+for(let key in aiReplies){
+
+if(question.includes(key)){
+
+answer.innerHTML=aiReplies[key];
+
+found=true;
+
+}
+
+}
+
+if(!found){
+
+answer.innerHTML="Sorry, I don't understand yet.";
+
+}
+
+}
+
+// =======================================
+// HARVEST CALENDAR
+// =======================================
+
+const harvest=[
+
+{crop:"Maize",month:"July - September"},
+
+{crop:"Yam",month:"August - October"},
+
+{crop:"Groundnut",month:"September"},
+
+{crop:"Millet",month:"October"},
+
+{crop:"Cassava",month:"Any Time"}
+
+];
+
+function loadHarvestCalendar(){
+
+let box=document.getElementById("harvestCalendar");
+
+if(!box) return;
+
+box.innerHTML="";
+
+harvest.forEach(function(item){
+
+box.innerHTML+=`
+
+<div class="cropCard">
+
+<h3>${item.crop}</h3>
+
+<p>${item.month}</p>
+
+</div>
+
+`;
+
+});
+
+}
+
+// =======================================
+// SALES REPORT
+// =======================================
+
+function salesReport(){
+
+let total=0;
+
+crops.forEach(function(c){
+
+total+=Number(c.price||0);
+
+});
+
+let report=document.getElementById("salesReport");
+
+if(report){
+
+report.innerHTML=
+
+`
+
+<h3>Sales Report</h3>
+
+<p>Total Crops: ${crops.length}</p>
+
+<p>Estimated Value: GH₵ ${total}</p>
+
+`;
+
+}
+
+}
+
+// =======================================
+// RECEIPT
+// =======================================
+
+function printReceipt(){
+
+window.print();
+
+}
+
+// =======================================
+// SIMPLE LIKE SYSTEM
+// =======================================
+
+let likes=0;
+
+function likeMarketplace(){
+
+likes++;
+
+let box=document.getElementById("likes");
+
+if(box){
+
+box.innerHTML=likes;
+
+}
+
+}
+
+// =======================================
+// COMMENTS
+// =======================================
+
+function addComment(){
+
+let text=document.getElementById("commentText").value;
+
+let list=document.getElementById("commentList");
+
+if(text=="") return;
+
+list.innerHTML+=`
+
+<div class="cropCard">
+
+💬 ${text}
+
+</div>
+
+`;
+
+document.getElementById("commentText").value="";
+
+}
+
+// =======================================
+// DELIVERY TRACKING (DEMO)
+// =======================================
+
+function trackDelivery(){
+
+let status=document.getElementById("deliveryStatus");
+
+if(status){
+
+status.innerHTML=
+
+"🚚 Driver has picked up your crops.";
+
+setTimeout(function(){
+
+status.innerHTML=
+
+"📦 Your crops are on the way.";
+
+},3000);
+
+setTimeout(function(){
+
+status.innerHTML=
+
+"✅ Delivery completed.";
+
+},6000);
+
+}
+
+}
+
+// =======================================
+// MULTI-LANGUAGE
+// =======================================
+
+function changeLanguage(){
+
+let lang=document.getElementById("languageSelect").value;
+
+notify("Language changed to "+lang);
+
+}
+
+// =======================================
+// INITIAL LOAD
+// =======================================
+
+window.addEventListener("load",function(){
+
+loadHarvestCalendar();
+
+salesReport();
+
+leaderBoard();
+
+showPrices();
+
+farmNews();
+
+});
+// ======================================
+// USER SETTINGS
+// ======================================
+
+let settings={
+
+theme:"light",
+
+language:"English",
+
+notifications:true
+
+};
+
+function saveSettings(){
+
+localStorage.setItem("farmlinkSettings",JSON.stringify(settings));
+
+notify("Settings Saved");
+
+}
+
+function loadSettings(){
+
+let data=localStorage.getItem("farmlinkSettings");
+
+if(data){
+
+settings=JSON.parse(data);
+
+}
+
+}
+
+loadSettings();
+
+// ======================================
+// LOCAL STORAGE
+// ======================================
+
+function saveMarketplace(){
+
+localStorage.setItem("crops",JSON.stringify(crops));
+
+localStorage.setItem("farmers",JSON.stringify(farmers));
+
+localStorage.setItem("buyers",JSON.stringify(buyers));
+
+}
+
+function loadMarketplace(){
+
+let c=localStorage.getItem("crops");
+
+let f=localStorage.getItem("farmers");
+
+let b=localStorage.getItem("buyers");
+
+if(c){
+
+crops=JSON.parse(c);
+
+displayMarket();
+
+}
+
+if(f){
+
+farmers=JSON.parse(f);
+
+}
+
+if(b){
+
+buyers=JSON.parse(b);
+
+}
+
+}
+
+loadMarketplace();
+
+// ======================================
+// AUTO SAVE
+// ======================================
+
+setInterval(function(){
+
+saveMarketplace();
+
+},5000);
+
+// ======================================
+// SIMPLE ANALYTICS
+// ======================================
+
+function analytics(){
+
+console.log("Farmers :",farmers.length);
+
+console.log("Buyers :",buyers.length);
+
+console.log("Crops :",crops.length);
+
+console.log("Orders :",buyerOrders.length);
+
+console.log("Favourite :",favourites.length);
+
+}
+
+// ======================================
+// EXPORT DATA
+// ======================================
+
+function exportData(){
+
+let data={
+
+farmers,
+
+buyers,
+
+crops,
+
+orders:buyerOrders
+
+};
+
+let file=new Blob(
+
+[JSON.stringify(data,null,2)],
+
+{type:"application/json"}
+
+);
+
+let link=document.createElement("a");
+
+link.href=URL.createObjectURL(file);
+
+link.download="FarmLinkData.json";
+
+link.click();
+
+}
+
+// ======================================
+// IMPORT DATA
+// ======================================
+
+function importData(input){
+
+let file=input.files[0];
+
+if(!file)return;
+
+let reader=new FileReader();
+
+reader.onload=function(e){
+
+let data=JSON.parse(e.target.result);
+
+farmers=data.farmers||[];
+
+buyers=data.buyers||[];
+
+crops=data.crops||[];
+
+displayMarket();
+
+notify("Data Imported");
+
+};
+
+reader.readAsText(file);
+
+}
+
+// ======================================
+// RANDOM FARM QUOTES
+// ======================================
+
+const quotes=[
+
+"Healthy farms build healthy nations.",
+
+"Every harvest begins with one seed.",
+
+"Hard work grows success.",
+
+"Farming feeds the world.",
+
+"Sell smarter with FarmLink."
+
+];
+
+function randomQuote(){
+
+let q=document.getElementById("quote");
+
+if(q){
+
+q.innerHTML=quotes[Math.floor(Math.random()*quotes.length)];
+
+}
+
+}
+
+setInterval(randomQuote,10000);
+
+randomQuote();
+// =====================================
+// DAILY MARKET UPDATES
+// =====================================
+
+const marketUpdates=[
+
+"📈 Maize demand has increased today.",
+
+"🌾 Yam prices remain stable.",
+
+"🚛 More transport available from Tamale.",
+
+"🫑 Pepper demand is high in Accra.",
+
+"🥜 Groundnut prices expected to rise."
+
+];
+
+function updateMarketNews(){
+
+let box=document.getElementById("marketNews");
+
+if(box){
+
+box.innerHTML=marketUpdates[Math.floor(Math.random()*marketUpdates.length)];
+
+}
+
+}
+
+setInterval(updateMarketNews,12000);
+
+updateMarketNews();
+
+// =====================================
+// FARMER BADGES
+// =====================================
+
+function farmerBadge(total){
+
+if(total>=100){
+
+return "🥇 Gold Farmer";
+
+}
+
+if(total>=50){
+
+return "🥈 Silver Farmer";
+
+}
+
+if(total>=20){
+
+return "🥉 Bronze Farmer";
+
+}
+
+return "🌱 New Farmer";
+
+}
+
+// =====================================
+// APP SEARCH
+// =====================================
+
+function globalSearch(){
+
+let keyword=document.getElementById("globalSearch").value.toLowerCase();
+
+let output=document.getElementById("globalResults");
+
+if(!output)return;
+
+output.innerHTML="";
+
+crops.forEach(function(c){
+
+if(c.crop.toLowerCase().includes(keyword)){
+
+output.innerHTML+=`
+
+<div class="cropCard">
+
+<h3>${c.crop}</h3>
+
+<p>GH₵ ${c.price}</p>
+
+<p>${c.town}</p>
+
+</div>
+
+`;
+
+}
+
+});
+
+}
+
+// =====================================
+// BOOKMARK CROPS
+// =====================================
+
+let bookmarks=[];
+
+function bookmarkCrop(index){
+
+bookmarks.push(crops[index]);
+
+notify("Crop bookmarked.");
+
+}
+
+// =====================================
+// QUICK CONTACT
+// =====================================
+
+function callFarmer(number){
+
+window.location.href="tel:"+number;
+
+}
+
+// =====================================
+// SHARE CROP
+// =====================================
+
+function shareCrop(index){
+
+const crop=crops[index];
+
+const text=
+
+`I found ${crop.crop} on FarmLink Ghana.`;
+
+if(navigator.share){
+
+navigator.share({
+
+title:"FarmLink Ghana",
+
+text:text
+
+});
+
+}else{
+
+navigator.clipboard.writeText(text);
+
+notify("Copied to clipboard.");
+
+}
+
+}
+
+// =====================================
+// FARMER OF THE DAY
+// =====================================
+
+function farmerOfTheDay(){
+
+if(farmers.length==0)return;
+
+let random=Math.floor(Math.random()*farmers.length);
+
+let box=document.getElementById("farmerDay");
+
+if(box){
+
+box.innerHTML=
+
+`
+<h3>👨‍🌾 Farmer of the Day</h3>
+
+<p>${farmers[random].name}</p>
+
+<p>${farmers[random].location}</p>
+
+`;
+
+}
+
+}
+
+setInterval(farmerOfTheDay,15000);
+
+farmerOfTheDay();
+
+// =====================================
+// APP VERSION
+// =====================================
+
+const APP_VERSION="FarmLink Ghana v1.0";
+
+console.log(APP_VERSION);
+// =====================================
+// CROP PRICE HISTORY
+// =====================================
+
+const priceHistory = {
+
+Yam:[110,115,120,125],
+
+Maize:[70,75,80,85],
+
+Groundnut:[130,140,145,150],
+
+Pepper:[80,90,95,100]
+
+};
+
+function showPriceHistory(crop){
+
+if(!priceHistory[crop]){
+
+notify("No history available.");
+
+return;
+
+}
+
+alert(
+
+crop+" Price History\n\n"+
+
+priceHistory[crop].join(" ➜ ")
+
+);
+
+}
+
+// =====================================
+// BUYER WISHLIST
+// =====================================
+
+let wishlist=[];
+
+function addWishlist(index){
+
+wishlist.push(crops[index]);
+
+notify("Added to Wishlist");
+
+}
+
+// =====================================
+// RECENT ACTIVITIES
+// =====================================
+
+let activities=[];
+
+function addActivity(text){
+
+activities.unshift({
+
+time:new Date().toLocaleTimeString(),
+
+text:text
+
+});
+
+activities=activities.slice(0,20);
+
+displayActivities();
+
+}
+
+function displayActivities(){
+
+let box=document.getElementById("activities");
+
+if(!box)return;
+
+box.innerHTML="";
+
+activities.forEach(function(item){
+
+box.innerHTML+=`
+
+<div class="cropCard">
+
+<b>${item.time}</b>
+
+<br>
+
+${item.text}
+
+</div>
+
+`;
+
+});
+
+}
+
+// =====================================
+// FARM CALCULATOR
+// =====================================
+
+function calculateRevenue(){
+
+let qty=Number(prompt("Quantity"));
+
+let price=Number(prompt("Price Per Unit"));
+
+if(isNaN(qty)||isNaN(price))return;
+
+alert(
+
+"Estimated Revenue\n\nGH₵ "+(qty*price)
+
+);
+
+}
+
+// =====================================
+// MARKET TIMER
+// =====================================
+
+function marketClock(){
+
+let now=new Date();
+
+let time=now.toLocaleString();
+
+let box=document.getElementById("marketClock");
+
+if(box){
+
+box.innerHTML=time;
+
+}
+
+}
+
+setInterval(marketClock,1000);
+
+// =====================================
+// AUTO BACKUP
+// =====================================
+
+function backup(){
+
+let backup={
+
+farmers,
+
+buyers,
+
+crops,
+
+orders:buyerOrders,
+
+wishlist,
+
+bookmarks
+
+};
+
+localStorage.setItem(
+
+"FarmLinkBackup",
+
+JSON.stringify(backup)
+
+);
+
+}
+
+setInterval(backup,15000);
+
+// =====================================
+// RESTORE BACKUP
+// =====================================
+
+function restoreBackup(){
+
+let data=localStorage.getItem(
+
+"FarmLinkBackup"
+
+);
+
+if(!data)return;
+
+data=JSON.parse(data);
+
+farmers=data.farmers||[];
+
+buyers=data.buyers||[];
+
+crops=data.crops||[];
+
+buyerOrders=data.orders||[];
+
+wishlist=data.wishlist||[];
+
+bookmarks=data.bookmarks||[];
+
+displayMarket();
+
+notify("Backup Restored");
+
+}
+
+// =====================================
+// APP INFORMATION
+// =====================================
+
+const appInfo={
+
+name:"FarmLink Ghana",
+
+version:"1.0",
+
+company:"CareForMe",
+
+country:"Ghana"
+
+};
+
+console.log(appInfo);
+
+// =====================================
+// STARTUP
+// =====================================
+
+restoreBackup();
+
+marketClock();
+
+addActivity("FarmLink Ghana Started");
+
+notify("Welcome to FarmLink Ghana");
+
+// =====================================
+// END OF PART
+// =====================================
+</script>
+
+
+
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+
+import { getFirestore } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+import { getStorage } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+import {
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+const name = document.getElementById("farmerName").value;
+const email = document.getElementById("farmerEmail").value;
+const password = document.getElementById("password").value;
+
+try{
+
+const userCredential =
+await createUserWithEmailAndPassword(
+auth,
+email,
+password
+);
+
+await setDoc(
+doc(db,"users",userCredential.user.uid),
+{
+name:name,
+email:email,
+role:"farmer",
+createdAt:new Date()
+}
+);
+
+alert("Registration Successful!");
+
+}catch(error){
+
+alert(error.message);
+
+}
+
+async function loginUser(){
+
+const email=document.getElementById("loginEmail").value;
+const password=document.getElementById("loginPassword").value;
+
+try{
+
+await signInWithEmailAndPassword(
+auth,
+email,
+password
+);
+
+alert("Login Successful!");
+
+}catch(error){
+
+alert(error.message);
+
+}
+
+}
+function logoutUser(){
+
+signOut(auth);
+
+}
+onAuthStateChanged(auth,(user)=>{
+
+if(user){
+
+console.log("Logged in:",user.email);
+
+}else{
+
+console.log("No user logged in");
+
+}
+
+});
+
+const firebaseConfig = {
+
+apiKey: "AIzaSyCT67_YltXU2Kk7VgocK8RZx1y_OGukhRc",
+
+authDomain: "farmlink-ghana-69d0a.firebaseapp.com",
+
+projectId: "farmlink-ghana-69d0a",
+
+storageBucket: "farmlink-ghana-69d0a.firebasestorage.app",
+
+messagingSenderId: "230960269104",
+
+appId: "1:230960269104:web:f8dd2ce6b46b79b4ce6af5",
+
+measurementId: "G-N8FDQY76M5"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+const auth = getAuth(app);
+
+const storage = getStorage(app);
+
+console.log("Firebase Connected Successfully");
+
+</script>
+
+</body>
+
+</html>
